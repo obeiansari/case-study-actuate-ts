@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { SubmitHandler, useForm } from 'react-hook-form';
 
 interface Book {
     title: string,
@@ -6,9 +7,13 @@ interface Book {
     author: string,
     year: number     
 }
+
+interface SearchBookFormData {
+    searchBook: string;
+}
+
 const Book: React.FC = () => {
 
-    const [searchBook,  setSearchBook]  = useState<string>(""); 
     const [isModal,     setIsModal]     = useState<boolean>(false); 
     const [bookList,    setBookList]    = useState<[]>([]);
     const [newBook,     setNewBook]     = useState<Book>({
@@ -18,23 +23,39 @@ const Book: React.FC = () => {
         year: 0
     })
 
-    const searchBookHandler = async () => {
+    const searchBookForm = useForm<SearchBookFormData>()
 
+    const { register, handleSubmit, formState } = searchBookForm
+
+    const { errors } = formState;
+
+    const searchBookHandler = async (data: SearchBookFormData) => {
+        console.log(data)
     }
 
     return (
         <>
             <div className='container mt-5'>
                 <h3>Search Book</h3>
-                <form className='row g-3' onSubmit={searchBookHandler}>
+                <form className='row g-3' onSubmit={handleSubmit(searchBookHandler)}>
                     <div className='col-auto'>
                         <input
                             type="text"
-                            value={searchBook}
-                            className="form-control" id="searchBook"
-                            onChange={(e) => setSearchBook(e.target.value)}
+                            {...register('searchBook', {
+                                required: {
+                                    value: true,
+                                    message: 'search string is required'
+                                }
+                            })}
+                            className="form-control" 
+                            aria-invalid={!!errors.searchBook}
+                            aria-describedby="searchBookError"
+                            id="searchBook"
                             placeholder="Search Book" />
-                        </div>
+                        {errors.searchBook && (
+                            <span className='error'>{errors.searchBook?.message}</span>
+                        )}
+                    </div>
                     <div className='col-auto'>
                         <button type="submit" className="btn btn-primary mb-3">Search</button>
                     </div>
